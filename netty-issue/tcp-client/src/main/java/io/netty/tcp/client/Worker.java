@@ -55,16 +55,19 @@ public class Worker implements Callable<Boolean> {
                 return null;
             }
         }
-        for (int i = 0; i < requestCount; i++) {
-            try {
+
+        try {
+            for (int i = 0; i < requestCount; i++) {
                 String req = request.replaceAll("REPLACE_DATE", String.valueOf(System.currentTimeMillis()));
                 client.send(req);
                 client.receive();
                 TimeUnit.MILLISECONDS.sleep(1000);
-            } catch (Exception e) {
-                LOG.warn("Request failed", e);
-                break;
             }
+        } catch (Exception e) {
+            LOG.warn("Request failed", e);
+            return false;
+        } finally {
+            client.disconnect();
         }
 
         return true;

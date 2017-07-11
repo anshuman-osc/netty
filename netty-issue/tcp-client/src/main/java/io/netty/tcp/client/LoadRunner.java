@@ -3,9 +3,6 @@ package io.netty.tcp.client;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -15,7 +12,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -77,14 +73,18 @@ public class LoadRunner {
         startSignal.countDown();
 
         long completed = 0;
-        for (Future<?> result : results) {
-            result.get();
+        int failures = 0;
+        for (Future<Boolean> result : results) {
+            boolean success = result.get();
+            if (!success) {
+                failures++;
+            }
             completed++;
             System.out.printf("Done: %d to go: %d%n", completed, workerCount - completed);
         }
 
         watch.stop();
-        System.out.println("done, took: " + watch.getTime() / 1000 + "s");
+        System.out.printf("done, took: %ds Failed: %d%n", watch.getTime() / 1000, failures);
         executorService.shutdownNow();
     }
 
