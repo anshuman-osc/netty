@@ -60,7 +60,8 @@ public class Worker implements Callable<Boolean> {
             for (int i = 0; i < requestCount; i++) {
                 String req = request.replaceAll("REPLACE_DATE", String.valueOf(System.currentTimeMillis()));
                 client.send(req);
-                client.receive();
+                String response = client.receive();
+                LOG.debug("Received: {}", response);
                 TimeUnit.MILLISECONDS.sleep(1000);
             }
         } catch (Exception e) {

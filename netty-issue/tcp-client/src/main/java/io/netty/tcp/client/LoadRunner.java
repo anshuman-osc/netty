@@ -17,7 +17,6 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 
-import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,9 +58,8 @@ public class LoadRunner {
 
     private void runLoadTest(String host, int port, int workerCount, int requestCount) throws Exception {
         executorService = Executors.newFixedThreadPool(workerCount);
-        StopWatch watch = new StopWatch();
-        watch.start();
 
+        long start = System.currentTimeMillis();
         CountDownLatch connectSignal = new CountDownLatch(workerCount);
         CountDownLatch startSignal = new CountDownLatch(1);
         List<Future<Boolean>> results = new ArrayList<>();
@@ -80,11 +78,10 @@ public class LoadRunner {
                 failures++;
             }
             completed++;
-            System.out.printf("Done: %d to go: %d%n", completed, workerCount - completed);
+            System.out.printf("Completed: %d Remaining: %d%n", completed, workerCount - completed);
         }
 
-        watch.stop();
-        System.out.printf("done, took: %ds Failed: %d%n", watch.getTime() / 1000, failures);
+        System.out.printf("done, took: %ds Failed: %d%n", ((System.currentTimeMillis() - start) / 1000), failures);
         executorService.shutdownNow();
     }
 

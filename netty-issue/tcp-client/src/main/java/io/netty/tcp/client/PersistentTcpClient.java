@@ -2,7 +2,6 @@ package io.netty.tcp.client;
 
 import java.io.*;
 import java.net.InetSocketAddress;
-import java.net.SocketException;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
@@ -23,12 +22,9 @@ public class PersistentTcpClient {
     private final int port;
     private final SSLContext sslContext;
 
-    private DataInputStream inputStream;
+    private InputStream inputStream;
     private DataOutputStream outputStream;
 
-    private Object serverInLock = new Object();
-
-    private Object outLock = new Object();
     private SSLSocketFactory sslSocketFactory = null;
 
     private BufferedReader reader = null;
@@ -49,54 +45,40 @@ public class PersistentTcpClient {
 
         socket.connect(new InetSocketAddress(host, port), connectTimeout);
 
-        synchronized (serverInLock) {
-            inputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
-        }
-        synchronized (outLock) {
-            outputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream(), 2048));
-        }
+        inputStream = socket.getInputStream();
+        outputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream(), 2048));
+
+        reader = new BufferedReader(new InputStreamReader(inputStream));
     }
 
     public void send(String m) throws IOException {
-        synchronized (outLock) {
-            outputStream.write(m.getBytes());
-            outputStream.flush();
-        }
+        outputStream.write(m.getBytes());
+        outputStream.flush();
     }
 
     public String receive() throws Exception {
         StringBuilder sb = new StringBuilder();
-        synchronized (serverInLock) {
-            int i = 0;
-            while (reader != null) {
-                String s = reader.readLine();
-                if (s == null) {
-                    throw new EOFException();
-                }
-                sb.append(s);
-                if (s.contains("<root>")) {
-                    i++;
-                }
-                if (s.contains("</root>")) {
-                    if (--i <= 0) {
-                        break;
-                    }
+        int i = 0;
+        while (reader != null) {
+            String s = reader.readLine();
+            if (s == null) {
+                throw new EOFException();
+            }
+            sb.append(s);
+            if (s.contains("<root>")) {
+                i++;
+            }
+            if (s.contains("</root>")) {
+                if (--i <= 0) {
+                    break;
                 }
             }
         }
+
         return sb.toString();
     }
 
     public void disconnect() {
-        try {
-            try {
-                socket.shutdownOutput();
-            } catch (SocketException e) {
-                LOG.error(e.getMessage(), e);
-            }
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
         closeQuietly(socket);
         closeQuietly(inputStream);
         closeQuietly(outputStream);

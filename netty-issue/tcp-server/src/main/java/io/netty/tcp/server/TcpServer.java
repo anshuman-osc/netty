@@ -21,6 +21,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
+import io.netty.handler.codec.xml.XmlFrameDecoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslHandler;
@@ -90,6 +91,7 @@ public class TcpServer {
                 if (!sslDisabled) {
                     ch.pipeline().addLast(new SslHandler(SslContextFactory.createSslEngine(sslContext)));
                 }
+                ch.pipeline().addLast(new XmlFrameDecoder(65 * 1024));
                 ch.pipeline().addLast(new StringDecoder());
                 ch.pipeline().addLast(new StringEncoder());
                 ch.pipeline().addLast(new EchoHandler());
@@ -103,16 +105,16 @@ public class TcpServer {
 
         @Override
         protected void channelRead0(final ChannelHandlerContext ctx, final String msg) throws Exception {
-            LOG.trace("Received: " + msg);
+            LOG.debug("Received: {}", msg);
             service.submit(() -> {
                 try {
                     TimeUnit.SECONDS.sleep(1); // simulate business logic delay
                 } catch (InterruptedException e) {
                     LOG.error("Interrupted", e);
                 }
+                LOG.debug("Responding");
                 ctx.writeAndFlush(msg);
             });
-            ctx.writeAndFlush(msg);
         }
     }
 }
