@@ -1,6 +1,8 @@
 package io.netty.tcp.client;
 
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -12,6 +14,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.net.ssl.KeyManagerFactory;
@@ -47,13 +50,8 @@ public class LoadRunner {
             requestCount = Integer.valueOf(args[3]);
         }
 
-        StringBuilder request = new StringBuilder();
-        try {
-            Path path = Paths.get(LoadRunner.class.getClassLoader().getResource("request.xml").toURI());
-            Stream<String> lines = Files.lines(path);
-            lines.forEach(line -> request.append(line).append("\n"));
-            lines.close();
-            requestXml = request.toString();
+        try (InputStream is = LoadRunner.class.getResourceAsStream("/request.xml")) {
+            requestXml = new BufferedReader(new InputStreamReader(is)).lines().collect(Collectors.joining(System.lineSeparator()));
             sslContext = getSSLContext();
             LoadRunner runner = new LoadRunner();
             runner.runLoadTest(host, port, workerCount, requestCount);
