@@ -15,7 +15,7 @@
         </encoder>
     </appender>
 
-    <logger name="io.netty" level="debug" />
+    <logger name="io.netty" level="info" />
     <logger name="io.netty.tcp" level="debug" />
 
     <root level="info">
