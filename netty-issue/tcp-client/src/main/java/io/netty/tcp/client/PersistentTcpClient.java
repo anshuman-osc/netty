@@ -2,7 +2,6 @@ package io.netty.tcp.client;
 
 import java.io.*;
 import java.net.InetSocketAddress;
-import java.util.Arrays;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
@@ -15,7 +14,7 @@ public class PersistentTcpClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(PersistentTcpClient.class);
 
-    private static final int DEFAULT_TIMEOUT = 100000;
+    private static final int DEFAULT_TIMEOUT = 10000;
 
     private SSLSocket socket;
 
