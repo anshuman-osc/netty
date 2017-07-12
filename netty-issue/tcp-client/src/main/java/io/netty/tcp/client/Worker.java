@@ -62,7 +62,7 @@ public class Worker implements Callable<Boolean> {
                 client.send(req);
                 String response = client.receive();
                 LOG.debug("Received: {}", response);
-                TimeUnit.MILLISECONDS.sleep(1000);
+                TimeUnit.MILLISECONDS.sleep(100);
             }
         } catch (Exception e) {
             LOG.warn("Request failed", e);

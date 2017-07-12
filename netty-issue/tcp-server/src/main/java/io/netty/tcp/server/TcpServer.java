@@ -131,8 +131,9 @@ public class TcpServer implements ConnectionMonitorMXBean {
                 } catch (InterruptedException e) {
                     LOG.error("Interrupted", e);
                 }
-                LOG.debug("Responding with: {}", msg);
-                ctx.writeAndFlush(msg);
+                String s = msg.replaceFirst("0800", "0810") + '\n';
+                LOG.debug("Responding with: {}", s);
+                ctx.writeAndFlush(s);
             });
         }
     }
