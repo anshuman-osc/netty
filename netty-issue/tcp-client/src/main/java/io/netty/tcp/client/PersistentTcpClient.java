@@ -14,7 +14,7 @@ public class PersistentTcpClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(PersistentTcpClient.class);
 
-    private static final int DEFAULT_TIMEOUT = 10000;
+    private static final int DEFAULT_TIMEOUT = 5000;
 
     private SSLSocket socket;
 

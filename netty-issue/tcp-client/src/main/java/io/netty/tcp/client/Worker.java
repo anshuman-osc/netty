@@ -61,8 +61,8 @@ public class Worker implements Callable<Boolean> {
                 String req = request.replaceAll("REPLACE_DATE", String.valueOf(System.currentTimeMillis()));
                 client.send(req);
                 String response = client.receive();
-                LOG.debug("Received: {}", response);
-                TimeUnit.MILLISECONDS.sleep(100);
+//                LOG.debug("Received: {}", response);
+                TimeUnit.MILLISECONDS.sleep(50 + new Double(Math.random()).longValue() * 1000);
             }
         } catch (Exception e) {
             LOG.warn("Request failed", e);
