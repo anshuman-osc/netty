@@ -2,6 +2,7 @@ package io.netty.tcp.client;
 
 import java.io.*;
 import java.net.InetSocketAddress;
+import java.util.Arrays;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
@@ -46,7 +47,7 @@ public class PersistentTcpClient {
         socket.connect(new InetSocketAddress(host, port), connectTimeout);
 
         inputStream = socket.getInputStream();
-        outputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream(), 2048));
+        outputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream(), 65 * 1024));
 
         reader = new BufferedReader(new InputStreamReader(inputStream));
     }
@@ -58,23 +59,15 @@ public class PersistentTcpClient {
 
     public String receive() throws Exception {
         StringBuilder sb = new StringBuilder();
-        int i = 0;
-        while (reader != null) {
-            String s = reader.readLine();
-            if (s == null) {
-                throw new EOFException();
-            }
-            sb.append(s);
-            if (s.contains("<root>")) {
-                i++;
-            }
-            if (s.contains("</root>")) {
-                if (--i <= 0) {
-                    break;
-                }
+        while (true) {
+            byte[] buffer = new byte[500];
+            inputStream.read(buffer, 0, buffer.length);
+            String data = new String(buffer);
+            sb.append(data);
+            if (sb.toString().contains("</root>")) {
+                break;
             }
         }
-
         return sb.toString();
     }
 

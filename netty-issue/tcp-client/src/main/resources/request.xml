@@ -656,7 +656,7 @@
             environment.
         </description>
     </book>
-    <book>
+    <book id="last">
         <author>Galos, Mike</author>
         <title>Visual Studio 7: A Comprehensive Guide</title>
         <genre>Computer</genre>

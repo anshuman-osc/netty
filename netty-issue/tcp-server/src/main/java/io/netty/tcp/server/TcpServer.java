@@ -85,12 +85,9 @@ public class TcpServer {
         return new ChannelInitializer<SocketChannel>() {
             @Override
             public void initChannel(SocketChannel ch) throws Exception {
-                boolean sslDisabled = Boolean.getBoolean("disableSsl");
-                LOG.info("initializing, ssl: {}", sslDisabled ? "disabled" : "enabled");
+                LOG.info("initializing");
+                ch.pipeline().addLast(new SslHandler(SslContextFactory.createSslEngine(sslContext)));
                 ch.pipeline().addLast(new LoggingHandler(LogLevel.DEBUG));
-                if (!sslDisabled) {
-                    ch.pipeline().addLast(new SslHandler(SslContextFactory.createSslEngine(sslContext)));
-                }
                 ch.pipeline().addLast(new XmlFrameDecoder(65 * 1024));
                 ch.pipeline().addLast(new StringDecoder());
                 ch.pipeline().addLast(new StringEncoder());
@@ -105,14 +102,13 @@ public class TcpServer {
 
         @Override
         protected void channelRead0(final ChannelHandlerContext ctx, final String msg) throws Exception {
-            LOG.debug("Received: {}", msg);
             service.submit(() -> {
                 try {
                     TimeUnit.SECONDS.sleep(1); // simulate business logic delay
                 } catch (InterruptedException e) {
                     LOG.error("Interrupted", e);
                 }
-                LOG.debug("Responding");
+                LOG.debug("Responding with: {}", msg);
                 ctx.writeAndFlush(msg);
             });
         }
