@@ -27,8 +27,6 @@ public class PersistentTcpClient {
 
     private SSLSocketFactory sslSocketFactory = null;
 
-    private BufferedReader reader = null;
-
     public PersistentTcpClient(String host, int port, SSLContext sslContext) {
         this.host = host;
         this.port = port;
@@ -47,8 +45,6 @@ public class PersistentTcpClient {
 
         inputStream = socket.getInputStream();
         outputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream(), 65 * 1024));
-
-        reader = new BufferedReader(new InputStreamReader(inputStream));
     }
 
     public void send(String m) throws IOException {
